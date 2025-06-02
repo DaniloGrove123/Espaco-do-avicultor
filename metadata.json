@@ -1,0 +1,6 @@
+{
+  "name": "Espaço do Avicultor - Poultry Management",
+  "description": "A React web application for managing poultry farm data, including financials and egg production, with data visualization and export features.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
