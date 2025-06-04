@@ -1,0 +1,45 @@
+# .github/workflows/deploy-functions.yml
+
+name: Deploy Firebase Functions
+
+on:
+  push:
+    branches:
+      - main # Aciona este workflow sempre que houver um push para o branch 'main'
+      # Se você usar 'master' ou outro branch principal, ajuste aqui.
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # O ambiente onde o workflow vai rodar (máquina virtual Linux)
+
+    steps:
+      - name: Checkout code # Passo 1: Obtém o código do seu repositório
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js # Passo 2: Configura a versão do Node.js (compatível com sua função)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # ATENÇÃO: DEVE ser '20' conforme seu package.json e firebase.json
+
+      - name: Display Node.js version # Opcional: Para verificar a versão
+        run: node -v
+
+      - name: Install dependencies in functions # Passo 3: Instala as dependências dentro da pasta functions
+        run: npm install --prefix functions
+
+      - name: Build TypeScript in functions # Passo 4: Compila o TypeScript dentro da pasta functions
+        run: npm run build --prefix functions
+
+      - name: Deploy Firebase Functions # Passo 5: Implanta as funções no Firebase
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}' # Token de acesso padrão do GitHub para o repositório
+          # Use o nome EXATO do Secret que você criou no GitHub
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ESPACO_DO_AVICULTOR }}'
+          projectId: Espaco-do-avicultor # ATENÇÃO: Use o ID do seu projeto Firebase
+          target: functions # Implanta apenas as funções
+          channelId: live # Implanta no canal 'live' (produção). Você pode usar 'staging' para um ambiente de teste.
+          expires: 30d # Opcional: Define a expiração para o canal (ex: 30d para 30 dias)
+          # Exemplo de outras opções:
+          # projectLocation: us-central1 # Se você quiser especificar a região de deploy para o Firebase
+          # entryPoint: functions # Se sua função não estiver na raiz do diretório "functions"
