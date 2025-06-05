@@ -1,4 +1,4 @@
-'''# .github/workflows/deploy-hosting.yml
+# .github/workflows/deploy-hosting.yml
 name: Deploy Frontend to Firebase Hosting
 
 on:
@@ -52,4 +52,3 @@ jobs:
         # Garante que o arquivo da chave seja removido, mesmo se etapas anteriores falharem.
         if: always()
         run: rm ./serviceAccountKey.json
-'''
