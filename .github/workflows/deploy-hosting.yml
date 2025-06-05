@@ -1,0 +1,55 @@
+'''# .github/workflows/deploy-hosting.yml
+name: Deploy Frontend to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main # Trigger on push to main branch
+    paths-ignore: # Optional: Don't trigger if only functions changed
+      - 'functions/**'
+      - '.github/workflows/deploy-functions.yml' # Ignore changes to the other workflow
+
+jobs:
+  build_and_deploy_hosting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Use latest checkout action
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Use Node.js v20, consistent with functions
+
+      - name: Install Frontend Dependencies
+        # Instala dependências na pasta raiz do projeto
+        run: npm install
+
+      - name: Build Frontend
+        # Executa o script de build (geralmente cria a pasta 'dist')
+        run: npm run build
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Authenticate Firebase CLI
+        # Cria um arquivo temporário com a chave da conta de serviço a partir do Secret
+        # e usa login:ci para autenticar de forma não interativa.
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_ESPACO_DO_AVICULTOR }}" > ./serviceAccountKey.json
+          firebase login:ci --no-localhost --key-file ./serviceAccountKey.json
+        env:
+          # Garante que o nome do secret corresponde exatamente ao criado no GitHub
+          FIREBASE_SERVICE_ACCOUNT_ESPACO_DO_AVICULTOR: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ESPACO_DO_AVICULTOR }}
+
+      - name: Deploy to Firebase Hosting
+        # Faz o deploy apenas do Hosting para o projeto especificado.
+        # --non-interactive: Evita prompts.
+        # --force: Útil em CI para sobrescrever deploys anteriores sem interação.
+        run: firebase deploy --only hosting --project espaco-do-avicultor --non-interactive --force
+
+      - name: Clean up service account key
+        # Garante que o arquivo da chave seja removido, mesmo se etapas anteriores falharem.
+        if: always()
+        run: rm ./serviceAccountKey.json
+'''
